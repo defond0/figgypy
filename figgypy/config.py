@@ -1,5 +1,7 @@
 import logging
 import os
+
+import boto3
 import seria
 import yaml
 
@@ -46,11 +48,15 @@ class Config(object):
         "/etc/"
     ]
 
-    def __init__(self, f, aws_config=None, gpg_config=None):
+    def __init__(self, f=None, s3_config=None, aws_config=None, gpg_config=None):
         self._aws_config = aws_config or {}
         self._gpg_config = gpg_config or {}
-        self._f = self._get_file(f)
+        self._f = self._get_file(f) if f else _get_s3(self, s3_config)
         self._cfg = self._get_cfg(self._f)
+
+    def _get_s3(self, s3_config):
+        s3_client = boto3.s3_client('s3').get_object()
+
 
     def _get_cfg(self, f):
         """Get configuration from config file"""
